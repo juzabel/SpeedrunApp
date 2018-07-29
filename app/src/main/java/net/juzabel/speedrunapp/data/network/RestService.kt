@@ -3,7 +3,10 @@ package net.juzabel.speedrunapp.data.network
 import com.google.gson.Gson
 import io.reactivex.Single
 import net.juzabel.speedrunapp.BuildConfig
-import net.juzabel.speedrunapp.data.network.entity.GameData
+import net.juzabel.speedrunapp.data.network.entity.Data
+import net.juzabel.speedrunapp.data.network.entity.game.Game
+import net.juzabel.speedrunapp.data.network.entity.run.Run
+import net.juzabel.speedrunapp.data.network.entity.user.User
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -31,5 +34,9 @@ class RestService @Inject constructor(){
         api = retrofit.create(Api::class.java)
     }
 
-    fun getGamesList(): Single<GameData> = api.getGamesList()
+    fun getGamesList(): Single<Data<List<Game>>> = api.getGamesList()
+
+    fun getRunsList(gameId: String): Single<Data<List<Run>>> = api.getRunsList(gameId)
+
+    fun getUser(id: String): Single<Data<User>> = api.getUser(id)
 }

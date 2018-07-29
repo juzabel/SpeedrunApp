@@ -12,6 +12,9 @@ interface GameDao {
     @Query("SELECT * FROM game")
     fun getAll(): Single<List<GameEntity>>
 
+    @Query("SELECT * FROM game WHERE id=:id")
+    fun getById(id: String): Single<GameEntity>
+
     @Insert
     fun insert(gameEntity: GameEntity)
 

@@ -6,11 +6,12 @@ import dagger.Lazy
 import io.reactivex.Completable
 import io.reactivex.Single
 import net.juzabel.speedrunapp.data.db.entity.GameEntity
+import net.juzabel.speedrunapp.data.db.entity.RunEntity
 import javax.inject.Inject
 
 class DBAdapter {
 
-    val database: DataBase
+    private val database: DataBase
 
     @Inject
     constructor(context: Lazy<Context>) {
@@ -20,15 +21,21 @@ class DBAdapter {
     fun allGames(): Single<List<GameEntity>>
             = database.gameDao().getAll()
 
-    fun insert(gameEntity: GameEntity): Completable
-            = Completable.fromAction { database.gameDao().insert(gameEntity) }
+    fun getGameById(id: String): Single<GameEntity>
+        = database.gameDao().getById(id)
 
     fun insertAll(gameEntityList: List<GameEntity>): Completable
         = Completable.fromAction { database.gameDao().insertAll(gameEntityList) }
 
-    fun delete(gameEntity: GameEntity): Completable
-            = Completable.fromAction { database.gameDao().delete(gameEntity) }
-
     fun deleteAll(): Completable
             = Completable.fromAction { database.gameDao().deleteAll() }
+
+    fun getRunByGameId(gameId: String): Single<RunEntity>?
+        = database.runDao().getRunByGameId(gameId)
+
+    fun insertRun(runEntity: RunEntity): Completable
+        = Completable.fromAction { database.runDao().insert(runEntity) }
+
+    fun deleteRun(runEntity: RunEntity): Completable
+        = Completable.fromAction { database.runDao().delete(runEntity) }
 }

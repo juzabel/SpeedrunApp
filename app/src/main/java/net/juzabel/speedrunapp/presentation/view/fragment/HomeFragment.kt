@@ -47,7 +47,7 @@ class HomeFragment : Fragment(), HomeContract.View{
     }
 
     override fun onGamesRetrieved(listGames: List<Game>) {
-        rvGameList.adapter = GamesAdapter(listGames, imageUtil)
+        rvGameList.adapter = GamesAdapter(listGames, imageUtil, homePresenter)
     }
 
     override fun onStop() {

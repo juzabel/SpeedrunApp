@@ -1,4 +1,4 @@
-package net.juzabel.speedrunapp.data.network.entity
+package net.juzabel.speedrunapp.data.network.entity.game
 
 import com.google.gson.annotations.SerializedName
 

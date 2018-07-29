@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
         injectActivityComponent()
-        navigator.loadHomeFragment(R.id.flayFragmentContainer)
+        navigator.loadHomeFragment()
     }
 
     fun getSpeedrunApplication(): SpeedrunApplication = application as SpeedrunApplication

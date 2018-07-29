@@ -10,7 +10,6 @@ import javax.inject.Inject
 
 class HomePresenter @Inject constructor(private val gameInteractor: Lazy<GameInteractor>, private val navigator: Lazy<Navigator>) : HomeContract.Presenter,
         DisposableObserver<List<Game>>() {
-
     lateinit var view: HomeContract.View
 
     override fun getGamesList() {
@@ -22,6 +21,10 @@ class HomePresenter @Inject constructor(private val gameInteractor: Lazy<GameInt
 
     override fun destroy() {
         gameInteractor.get().clear()
+    }
+
+    override fun gameSelected(gameId: String) {
+        navigator.get().loadRunFragment(gameId)
     }
 
     override fun onComplete() {

@@ -15,4 +15,6 @@ class GameDBDataSource @Inject constructor(private val dbAdapter: Lazy<DBAdapter
 
     fun deleteAll(): Completable
         = dbAdapter.get().deleteAll()
+
+    fun getGameById(id: String): Single<GameEntity> = dbAdapter.get().getGameById(id)
 }

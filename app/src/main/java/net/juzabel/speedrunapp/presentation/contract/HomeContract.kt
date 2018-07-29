@@ -9,5 +9,6 @@ interface HomeContract {
     }
     interface Presenter: BaseContract.BasePresenter{
         fun getGamesList()
+        fun gameSelected(gameId: String)
     }
 }

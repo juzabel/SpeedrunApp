@@ -1,3 +1,3 @@
 package net.juzabel.speedrunapp.data.network.entity
 
-data class GameData(val data: List<Game>?)
+data class Data<T>(val data:T)
