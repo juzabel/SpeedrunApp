@@ -2,6 +2,7 @@ package net.juzabel.speedrunapp.data.repository
 
 import android.accounts.NetworkErrorException
 import dagger.Lazy
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
@@ -21,25 +22,25 @@ class RunRepositoryImpl @Inject constructor(private val runMapper: Lazy<RunMappe
                                             private val gameDataFactory: Lazy<GameDataFactory>) : RunRepository {
     override fun getRunByGameId(gameId: String): Observable<Pair<Run, Game>> {
 
-        val dbSingleRun: Single<Pair<Run, Game>> = dataFactory.get().createDBDataSource().getRunByGameId(gameId)
-                ?.map { runMapper.get().toRun(it) }?.onErrorResumeNext { Single.error(DBItemNotFoundException()) }
-                ?.zipWith( gameDataFactory.get().createDBDataSource().getGameById(gameId)
+        val dbMaybeRun: Maybe<Pair<Run, Game>> = dataFactory.get().createDBDataSource().getRunByGameId(gameId)
+                .map { runMapper.get().toRun(it) }
+                .zipWith( gameDataFactory.get().createDBDataSource().getGameById(gameId)
                         .map { gameMapper.get().toGame(it) }, BiFunction { run, game ->
                     Pair(run, game)
-                }) ?: Single.error(DBItemNotFoundException())
+                })
 
 
-        val nwSingleRun: Single<Pair<Run, Game>> = dataFactory.get().createNetworkDataSource().getRunByGameId(gameId)
-                ?.flatMap { run ->
+        val nwMaybeRun: Maybe<Pair<Run, Game>> = dataFactory.get().createNetworkDataSource().getRunByGameId(gameId)
+                .flatMap { run ->
                     dataFactory.get().createDBDataSource().delete(run)
                             .andThen(dataFactory.get().createDBDataSource().insert(run))
-                            .andThen(Single.just(run))
+                            .andThen(Maybe.just(run))
                 }
-                ?.map { runMapper.get().toRun(it) }?.zipWith( gameDataFactory.get().createDBDataSource().getGameById(gameId)
+                .map { runMapper.get().toRun(it) }.zipWith( gameDataFactory.get().createDBDataSource().getGameById(gameId)
                         .map { gameMapper.get().toGame(it) }, BiFunction { run, game ->
                     Pair(run, game)
-                }) ?: Single.error(NetworkErrorException())
+                })
 
-        return Observable.mergeDelayError(dbSingleRun.toObservable(), nwSingleRun.toObservable())
+        return Observable.mergeDelayError(dbMaybeRun.toObservable(), nwMaybeRun.toObservable())
     }
 }

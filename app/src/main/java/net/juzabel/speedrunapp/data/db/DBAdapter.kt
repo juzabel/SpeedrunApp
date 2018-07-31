@@ -4,6 +4,7 @@ import android.arch.persistence.room.Room
 import android.content.Context
 import dagger.Lazy
 import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Single
 import net.juzabel.speedrunapp.data.db.entity.GameEntity
 import net.juzabel.speedrunapp.data.db.entity.RunEntity
@@ -21,7 +22,7 @@ class DBAdapter {
     fun allGames(): Single<List<GameEntity>>
             = database.gameDao().getAll()
 
-    fun getGameById(id: String): Single<GameEntity>
+    fun getGameById(id: String): Maybe<GameEntity>
         = database.gameDao().getById(id)
 
     fun insertAll(gameEntityList: List<GameEntity>): Completable
@@ -30,7 +31,7 @@ class DBAdapter {
     fun deleteAll(): Completable
             = Completable.fromAction { database.gameDao().deleteAll() }
 
-    fun getRunByGameId(gameId: String): Single<RunEntity>?
+    fun getRunByGameId(gameId: String): Maybe<RunEntity>
         = database.runDao().getRunByGameId(gameId)
 
     fun insertRun(runEntity: RunEntity): Completable

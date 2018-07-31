@@ -1,5 +1,6 @@
 package net.juzabel.speedrunapp.data.network
 
+import io.reactivex.Maybe
 import io.reactivex.Single
 import net.juzabel.speedrunapp.data.network.entity.Data
 import net.juzabel.speedrunapp.data.network.entity.game.Game
@@ -14,7 +15,7 @@ interface Api {
     fun getGamesList(): Single<Data<List<Game>>>
 
     @GET("api/v1/runs")
-    fun getRunsList(@Query("game") gameId: String): Single<Data<List<Run>>>
+    fun getRunsList(@Query("game") gameId: String): Maybe<Data<List<Run>>>
 
     @GET("api/v1/users/{id}")
     fun getUser(@Path("id") id: String): Single<Data<User>>

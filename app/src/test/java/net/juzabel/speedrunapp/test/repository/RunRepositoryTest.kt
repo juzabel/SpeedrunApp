@@ -6,6 +6,7 @@ import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.whenever
 import dagger.Lazy
 import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.observers.TestObserver
 import net.juzabel.speedrunapp.data.db.entity.GameEntity
@@ -91,9 +92,9 @@ class RunRepositoryTest : BaseTest() {
         runEntityFromNW = FakeDataProvider.getRunWithId(RUN_ID, RUN_GAME_ID, PLAYER_NAME_NW)
         gameEntity = FakeDataProvider.getListGameEntity(1)[0]
 
-        whenever(gameDBDataSource.getGameById(any())).thenReturn(Single.just(gameEntity))
-        whenever(runDBDataSource.getRunByGameId(RUN_GAME_ID)).thenReturn(Single.just(runEntityFromDB))
-        whenever(runNetworkDataSource.getRunByGameId(RUN_GAME_ID)).thenReturn(Single.just(runEntityFromNW))
+        whenever(gameDBDataSource.getGameById(any())).thenReturn(Maybe.just(gameEntity))
+        whenever(runDBDataSource.getRunByGameId(RUN_GAME_ID)).thenReturn(Maybe.just(runEntityFromDB))
+        whenever(runNetworkDataSource.getRunByGameId(RUN_GAME_ID)).thenReturn(Maybe.just(runEntityFromNW))
 
         val testObserver: TestObserver<Pair<Run, Game>> = runRepositoryImpl.getRunByGameId(RUN_GAME_ID).test()
         testObserver.assertNoErrors()
@@ -116,12 +117,12 @@ class RunRepositoryTest : BaseTest() {
         runEntityFromNW = FakeDataProvider.getRunWithId(RUN_ID, RUN_GAME_ID, PLAYER_NAME_NW)
         gameEntity = FakeDataProvider.getListGameEntity(1)[0]
 
-        whenever(runNetworkDataSource.getRunByGameId(RUN_GAME_ID)).thenReturn(Single.just(runEntityFromNW))
-        whenever(gameDBDataSource.getGameById(any())).thenReturn(Single.just(gameEntity))
-        whenever(runDBDataSource.getRunByGameId(RUN_GAME_ID)).thenReturn(Single.error(exception))
+        whenever(runNetworkDataSource.getRunByGameId(RUN_GAME_ID)).thenReturn(Maybe.just(runEntityFromNW))
+        whenever(gameDBDataSource.getGameById(any())).thenReturn(Maybe.just(gameEntity))
+        whenever(runDBDataSource.getRunByGameId(RUN_GAME_ID)).thenReturn(Maybe.error(exception))
 
         val testObserver: TestObserver<Pair<Run, Game>> = runRepositoryImpl.getRunByGameId(RUN_GAME_ID).test()
-        testObserver.assertError(DBItemNotFoundException::class.java)
+        testObserver.assertError(exception)
         testObserver.assertNotComplete()
 
         val runAndGameNW: Pair<Run, Game> = testObserver.events[0][0] as Pair<Run, Game>
@@ -136,9 +137,9 @@ class RunRepositoryTest : BaseTest() {
         runEntityFromDB = FakeDataProvider.getRunWithId(RUN_ID, RUN_GAME_ID, PLAYER_NAME_DB)
         gameEntity = FakeDataProvider.getListGameEntity(1)[0]
 
-        whenever(runNetworkDataSource.getRunByGameId(RUN_GAME_ID)).thenReturn(Single.error(exception))
-        whenever(gameDBDataSource.getGameById(any())).thenReturn(Single.just(gameEntity))
-        whenever(runDBDataSource.getRunByGameId(RUN_GAME_ID)).thenReturn(Single.just(runEntityFromDB))
+        whenever(runNetworkDataSource.getRunByGameId(RUN_GAME_ID)).thenReturn(Maybe.error(exception))
+        whenever(gameDBDataSource.getGameById(any())).thenReturn(Maybe.just(gameEntity))
+        whenever(runDBDataSource.getRunByGameId(RUN_GAME_ID)).thenReturn(Maybe.just(runEntityFromDB))
 
         val testObserver: TestObserver<Pair<Run, Game>> = runRepositoryImpl.getRunByGameId(RUN_GAME_ID).test()
         testObserver.assertError(exception)

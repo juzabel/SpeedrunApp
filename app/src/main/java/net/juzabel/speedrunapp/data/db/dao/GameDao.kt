@@ -4,6 +4,7 @@ import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Delete
 import android.arch.persistence.room.Insert
 import android.arch.persistence.room.Query
+import io.reactivex.Maybe
 import io.reactivex.Single
 import net.juzabel.speedrunapp.data.db.entity.GameEntity
 
@@ -13,7 +14,7 @@ interface GameDao {
     fun getAll(): Single<List<GameEntity>>
 
     @Query("SELECT * FROM game WHERE id=:id")
-    fun getById(id: String): Single<GameEntity>
+    fun getById(id: String): Maybe<GameEntity>
 
     @Insert
     fun insert(gameEntity: GameEntity)
