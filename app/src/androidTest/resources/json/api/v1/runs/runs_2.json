@@ -1,0 +1,38 @@
+{
+  "data": [
+    {
+      "id": "7z0nvdem",
+      "game": "2",
+      "videos": {
+        "links": [
+          {
+            "uri": "https://youtu.be/-Vesbd8uJzE"
+          }
+        ]
+      },
+      "players": [
+        {
+          "rel": "guest",
+          "name": "Player",
+          "uri": "https://www.speedrun.com/api/v1/users/mkj9nw84"
+        }
+      ],
+      "times": {
+        "primary": "PT7M15S",
+        "primary_t": 435,
+        "realtime": "PT7M15S",
+        "realtime_t": 435,
+        "realtime_noloads": null,
+        "realtime_noloads_t": 0,
+        "ingame": null,
+        "ingame_t": 0
+      }
+    }
+  ],
+  "pagination": {
+    "offset": 0,
+    "max": 20,
+    "size": 15,
+    "links": []
+  }
+}
