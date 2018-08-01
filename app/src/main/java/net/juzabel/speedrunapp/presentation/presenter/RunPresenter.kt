@@ -2,14 +2,12 @@ package net.juzabel.speedrunapp.presentation.presenter
 
 import dagger.Lazy
 import io.reactivex.observers.DisposableObserver
-import net.juzabel.speedrunapp.domain.exception.DBItemNotFoundException
 import net.juzabel.speedrunapp.domain.interactor.RunInteractor
 import net.juzabel.speedrunapp.domain.model.Game
 import net.juzabel.speedrunapp.domain.model.Run
 import net.juzabel.speedrunapp.presentation.Navigator
 import net.juzabel.speedrunapp.presentation.contract.RunContract
 import net.juzabel.speedrunapp.presentation.util.VideoUtil
-import timber.log.Timber
 import javax.inject.Inject
 
 class RunPresenter @Inject constructor(private val runInteractor: Lazy<RunInteractor>,
@@ -41,9 +39,6 @@ class RunPresenter @Inject constructor(private val runInteractor: Lazy<RunIntera
     }
 
     override fun onError(e: Throwable) {
-        if(e !is DBItemNotFoundException) {
-            Timber.e(e)
-            navigator.get().showMessage(e.localizedMessage)
-        }
+        navigator.get().showMessage(e.localizedMessage)
     }
 }
