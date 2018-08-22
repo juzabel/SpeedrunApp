@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import dagger.Lazy
+import io.reactivex.Observable
 import net.juzabel.speedrunapp.domain.interactor.GameInteractor
 import net.juzabel.speedrunapp.presentation.Navigator
 import net.juzabel.speedrunapp.presentation.contract.HomeContract
@@ -39,17 +40,17 @@ class HomePresenterTest : BaseTest(){
 
     @Test
     fun testGetGames() {
-        whenever(gameInteractor.execute(any(), eq(null))).then { homePresenter.onNext(Collections.emptyList()) }
+        whenever(gameInteractor.execute(eq(null))).thenReturn (Observable.just(Collections.emptyList()) )
         homePresenter.getGamesList()
-        verify(gameInteractor, Mockito.times(1)).execute(any(), eq(null))
+        verify(gameInteractor, Mockito.times(1)).execute(eq(null))
         verify(view, Mockito.times(1)).onGamesRetrieved(any())
     }
 
     @Test
     fun testGetGamesError() {
-        whenever(gameInteractor.execute(any(), eq(null))).then { homePresenter.onError(Exception(ERROR_MESSAGE)) }
+        whenever(gameInteractor.execute(eq(null))).thenReturn(Observable.error(Exception(ERROR_MESSAGE)))
         homePresenter.getGamesList()
-        verify(gameInteractor, Mockito.times(1)).execute(any(), eq(null))
+        verify(gameInteractor, Mockito.times(1)).execute(eq(null))
         verify(navigator, Mockito.times(1)).showMessage(ERROR_MESSAGE)
     }
 

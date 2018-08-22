@@ -2,7 +2,6 @@ package net.juzabel.speedrunapp.test.repository
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
-import dagger.Lazy
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.observers.TestObserver
@@ -55,7 +54,7 @@ class GameRepositoryTest : BaseTest() {
         whenever(gameDBDataSource.deleteAll()).thenReturn(Completable.complete())
         whenever(gameDBDataSource.insertAll(any())).thenReturn(Completable.complete())
 
-        gameRepositoryImpl = GameRepositoryImpl(Lazy { gameMapper }, Lazy { gameDataFactory })
+        gameRepositoryImpl = GameRepositoryImpl(gameMapper, gameDataFactory)
     }
 
     @Test
@@ -78,7 +77,7 @@ class GameRepositoryTest : BaseTest() {
     }
 
     @Test
-    fun testGetAllGamesErrorDB(){
+    fun testGetAllGamesErrorDB() {
         gameListFromDB = FakeDataProvider.getListGameEntity(NUM_GAMES_DB)
 
         whenever(gameDBDataSource.allGames()).thenReturn(Single.just(gameListFromDB))
@@ -93,7 +92,7 @@ class GameRepositoryTest : BaseTest() {
     }
 
     @Test
-    fun testGetAllGamesErrorNW(){
+    fun testGetAllGamesErrorNW() {
         gameListFromNW = FakeDataProvider.getListGameEntity(NUM_GAMES_NW)
 
         whenever(gameDBDataSource.allGames()).thenReturn(Single.error(exception))

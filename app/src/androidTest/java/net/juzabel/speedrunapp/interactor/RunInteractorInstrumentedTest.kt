@@ -1,10 +1,12 @@
 package net.juzabel.speedrunapp.interactor
 
-import dagger.Lazy
+import com.nhaarman.mockitokotlin2.whenever
+import io.reactivex.Maybe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.TestObserver
 import io.reactivex.schedulers.Schedulers
 import junit.framework.TestCase.assertTrue
+import net.juzabel.speedrunapp.FakeDataProvider
 import net.juzabel.speedrunapp.base.BaseInstrumentedTest
 import net.juzabel.speedrunapp.data.mapper.GameMapper
 import net.juzabel.speedrunapp.data.mapper.RunMapper
@@ -46,35 +48,23 @@ class RunInteractorInstrumentedTest : BaseInstrumentedTest() {
 
         gameMapper = GameMapper()
 
-        runDataFactory = RunDataFactory(Lazy { dbAdapter }, Lazy { RestService(apiService) })
+        runDataFactory = RunDataFactory(dbAdapter, RestService(apiService))
 
-        gameDataFactory = GameDataFactory(Lazy { dbAdapter }, Lazy { RestService(apiService) })
+        gameDataFactory = GameDataFactory(dbAdapter, RestService(apiService))
 
-        gameRepositoryImpl = GameRepositoryImpl(Lazy { gameMapper }, Lazy { gameDataFactory })
+        gameRepositoryImpl = GameRepositoryImpl(gameMapper, gameDataFactory)
 
-        runRepositoryImpl = RunRepositoryImpl(Lazy { runMapper }, Lazy { gameMapper }, Lazy { runDataFactory }, Lazy { gameDataFactory })
+        runRepositoryImpl = RunRepositoryImpl(runMapper, gameMapper, runDataFactory, gameDataFactory)
 
-        runInteractor = RunInteractor(Lazy { runRepositoryImpl })
+        runInteractor = RunInteractor(runRepositoryImpl)
     }
 
     @Test
     fun testRetrieveRunUser() {
-
-        // Test network OK
-        //First we get the games to save in db
-        var mockResponse = MockResponse().setResponseCode(200)
-                .setBody(getJson("json/api/v1/games/games_1.json"))
-        mockServer.enqueue(mockResponse)
-
-        var testObserverGame: TestObserver<List<Game>> = gameRepositoryImpl.getAll().test()
-        testObserverGame.awaitTerminalEvent(2, TimeUnit.SECONDS)
-
-        testObserverGame.assertNoErrors()
-        testObserverGame.assertComplete()
-        assertTrue((testObserverGame.events[0][0] as List<Game>).size == 1)
-
+        whenever(dbAdapter.getGameById(GAME_ID_USER)).thenReturn(Maybe.just(FakeDataProvider.getGameEntityWithGameId(GAME_ID_USER)))
+        whenever(dbAdapter.getRunByGameId(GAME_ID_USER)).thenReturn(Maybe.empty())
         //Get first run
-        mockResponse = MockResponse().setResponseCode(200)
+        var mockResponse = MockResponse().setResponseCode(200)
                 .setBody(getJson("json/api/v1/runs/runs_1.json"))
         mockServer.enqueue(mockResponse)
         mockResponse = MockResponse().setResponseCode(200)
@@ -99,22 +89,11 @@ class RunInteractorInstrumentedTest : BaseInstrumentedTest() {
 
     @Test
     fun testRetrieveRunGuest() {
-
-        // Test network OK
-        //First we get the games to save in db
-        var mockResponse = MockResponse().setResponseCode(200)
-                .setBody(getJson("json/api/v1/games/games_2.json"))
-        mockServer.enqueue(mockResponse)
-
-        var testObserverGame: TestObserver<List<Game>> = gameRepositoryImpl.getAll().test()
-        testObserverGame.awaitTerminalEvent(2, TimeUnit.SECONDS)
-
-        testObserverGame.assertNoErrors()
-        testObserverGame.assertComplete()
-        assertTrue((testObserverGame.events[0][0] as List<Game>).size == 1)
+        whenever(dbAdapter.getGameById(GAME_ID_GUEST)).thenReturn(Maybe.just(FakeDataProvider.getGameEntityWithGameId(GAME_ID_GUEST)))
+        whenever(dbAdapter.getRunByGameId(GAME_ID_GUEST)).thenReturn(Maybe.empty())
 
         //Get first run
-        mockResponse = MockResponse().setResponseCode(200)
+        var mockResponse = MockResponse().setResponseCode(200)
                 .setBody(getJson("json/api/v1/runs/runs_2.json"))
         mockServer.enqueue(mockResponse)
 
@@ -136,6 +115,9 @@ class RunInteractorInstrumentedTest : BaseInstrumentedTest() {
 
     @Test
     fun testRetrieveRunError() {
+        whenever(dbAdapter.getGameById(GAME_ID_GUEST)).thenReturn(Maybe.just(FakeDataProvider.getGameEntityWithGameId(GAME_ID_GUEST)))
+        whenever(dbAdapter.getRunByGameId(GAME_ID_GUEST)).thenReturn(Maybe.empty())
+
         //Get first run
         var mockResponse = MockResponse().setResponseCode(500)
         mockServer.enqueue(mockResponse)

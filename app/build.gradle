@@ -11,7 +11,7 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'com.github.tmurakami.dexopener.DexOpenerAndroidJUnitRunner'
     }
     dataBinding {
         enabled = true
@@ -77,6 +77,9 @@ dependencies {
     androidTestImplementation "com.android.support.test.espresso:espresso-core:${rootProject.ext.espressoVersion}"
     testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoVersion}"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:${rootProject.ext.mockitoKotlinVersion}"
+    androidTestImplementation "org.mockito:mockito-android:${rootProject.ext.mockitoVersion}"
+    androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:${rootProject.ext.mockitoKotlinVersion}"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:${rootProject.ext.mockWebServerVersion}"
+    androidTestImplementation 'com.github.tmurakami:dexopener:1.0.2'
 
 }

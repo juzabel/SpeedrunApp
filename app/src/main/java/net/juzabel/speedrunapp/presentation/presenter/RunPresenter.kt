@@ -1,23 +1,30 @@
 package net.juzabel.speedrunapp.presentation.presenter
 
 import dagger.Lazy
-import io.reactivex.observers.DisposableObserver
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import net.juzabel.speedrunapp.domain.interactor.RunInteractor
-import net.juzabel.speedrunapp.domain.model.Game
-import net.juzabel.speedrunapp.domain.model.Run
 import net.juzabel.speedrunapp.presentation.Navigator
+import net.juzabel.speedrunapp.presentation.base.DisposableManager
 import net.juzabel.speedrunapp.presentation.contract.RunContract
 import net.juzabel.speedrunapp.presentation.util.VideoUtil
 import javax.inject.Inject
 
 class RunPresenter @Inject constructor(private val runInteractor: Lazy<RunInteractor>,
-                                       private val videoUtil: Lazy<VideoUtil>, private val navigator: Lazy<Navigator>)
-    : RunContract.Presenter, DisposableObserver<Pair<Run, Game>>() {
+                                       private val videoUtil: Lazy<VideoUtil>, private val navigator: Lazy<Navigator>) : DisposableManager(), RunContract.Presenter {
 
     lateinit var view: RunContract.View
 
     override fun loadRun(gameId: String) {
-        runInteractor.get().execute(this, gameId)
+        runInteractor.get().execute(gameId).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread(), true)
+                .subscribeBy(
+                        onError = { navigator.get().showMessage(it.localizedMessage) },
+                        onNext = { view.onRunRetrieved(it.first, it.second) }
+                )
+                .addTo(compositeDisposable)
     }
 
     override fun loadVideo(path: String) {
@@ -25,20 +32,5 @@ class RunPresenter @Inject constructor(private val runInteractor: Lazy<RunIntera
     }
 
     override fun create() {
-    }
-
-    override fun destroy() {
-        runInteractor.get().clear()
-    }
-
-    override fun onNext(pairRunGame: Pair<Run, Game>) {
-        view.onRunRetrieved(pairRunGame.first, pairRunGame.second)
-    }
-
-    override fun onComplete() {
-    }
-
-    override fun onError(e: Throwable) {
-        navigator.get().showMessage(e.localizedMessage)
     }
 }

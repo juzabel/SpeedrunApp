@@ -1,6 +1,5 @@
 package net.juzabel.speedrunapp.data.repository
 
-import dagger.Lazy
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
@@ -13,29 +12,29 @@ import net.juzabel.speedrunapp.domain.model.Run
 import net.juzabel.speedrunapp.domain.repository.RunRepository
 import javax.inject.Inject
 
-class RunRepositoryImpl @Inject constructor(private val runMapper: Lazy<RunMapper>,
-                                            private val gameMapper: Lazy<GameMapper>,
-                                            private val dataFactory: Lazy<RunDataFactory>,
-                                            private val gameDataFactory: Lazy<GameDataFactory>) : RunRepository {
+class RunRepositoryImpl @Inject constructor(private val runMapper: RunMapper,
+                                            private val gameMapper: GameMapper,
+                                            private val dataFactory: RunDataFactory,
+                                            private val gameDataFactory: GameDataFactory) : RunRepository {
     override fun getRunByGameId(gameId: String): Observable<Pair<Run, Game>> {
 
-        val dbMaybeRun: Maybe<Pair<Run, Game>> = dataFactory.get().createDBDataSource().getRunByGameId(gameId)
-                .map { runMapper.get().toRun(it) }
-                .zipWith( gameDataFactory.get().createDBDataSource().getGameById(gameId)
-                        .map { gameMapper.get().toGame(it) }, BiFunction { run, game ->
+        val dbMaybeRun: Maybe<Pair<Run, Game>> = dataFactory.createDBDataSource().getRunByGameId(gameId)
+                .map { runMapper.toRun(it) }
+                .zipWith( gameDataFactory.createDBDataSource().getGameById(gameId)
+                        .map { gameMapper.toGame(it) }, BiFunction { run, game ->
                     Pair(run, game)
                 })
 
 
-        val nwMaybeRun: Maybe<Pair<Run, Game>> = dataFactory.get().createNetworkDataSource().getRunByGameId(gameId)
+        val nwMaybeRun: Maybe<Pair<Run, Game>> = dataFactory.createNetworkDataSource().getRunByGameId(gameId)
                 .flatMap { run ->
-                    dataFactory.get().createDBDataSource().delete(run)
-                            .andThen(dataFactory.get().createDBDataSource().insert(run))
+                    dataFactory.createDBDataSource().delete(run)
+                            .andThen(dataFactory.createDBDataSource().insert(run))
                             .andThen(Maybe.just(run))
                 }
-                .map { runMapper.get().toRun(it) }
-                .zipWith( gameDataFactory.get().createDBDataSource().getGameById(gameId)
-                        .map { gameMapper.get().toGame(it) }, BiFunction { run, game ->
+                .map { runMapper.toRun(it) }
+                .zipWith( gameDataFactory.createDBDataSource().getGameById(gameId)
+                        .map { gameMapper.toGame(it) }, BiFunction { run, game ->
                     Pair(run, game)
                 })
 

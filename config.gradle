@@ -19,6 +19,7 @@ ext {
     timberVersion = '4.7.1'
     glideVersion = '4.7.1'
     mockWebServerVersion = '3.10.0'
+    byteBuddyVersion = '1.8.16'
 
     //Url
     baseUrl = 'https://www.speedrun.com'

@@ -1,13 +1,9 @@
 package net.juzabel.speedrunapp.test.repository
 
-import android.accounts.NetworkErrorException
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.whenever
-import dagger.Lazy
 import io.reactivex.Completable
 import io.reactivex.Maybe
-import io.reactivex.Single
 import io.reactivex.observers.TestObserver
 import net.juzabel.speedrunapp.data.db.entity.GameEntity
 import net.juzabel.speedrunapp.data.db.entity.RunEntity
@@ -20,7 +16,6 @@ import net.juzabel.speedrunapp.data.repository.datasource.GameDBDataSource
 import net.juzabel.speedrunapp.data.repository.datasource.GameNetworkDataSource
 import net.juzabel.speedrunapp.data.repository.datasource.RunDBDataSource
 import net.juzabel.speedrunapp.data.repository.datasource.RunNetworkDataSource
-import net.juzabel.speedrunapp.domain.exception.DBItemNotFoundException
 import net.juzabel.speedrunapp.domain.model.Game
 import net.juzabel.speedrunapp.domain.model.Run
 import net.juzabel.speedrunapp.test.FakeDataProvider
@@ -83,7 +78,7 @@ class RunRepositoryTest : BaseTest() {
         whenever(runDBDataSource.delete(any())).thenReturn(Completable.complete())
         whenever(runDBDataSource.insert(any())).thenReturn(Completable.complete())
 
-        runRepositoryImpl = RunRepositoryImpl(Lazy { runMapper }, Lazy { gameMapper }, Lazy { runDataFactory }, Lazy { gameDataFactory })
+        runRepositoryImpl = RunRepositoryImpl(runMapper, gameMapper, runDataFactory, gameDataFactory)
     }
 
     @Test
@@ -113,7 +108,7 @@ class RunRepositoryTest : BaseTest() {
     }
 
     @Test
-    fun testGetRunErrorDB(){
+    fun testGetRunErrorDB() {
         runEntityFromNW = FakeDataProvider.getRunWithId(RUN_ID, RUN_GAME_ID, PLAYER_NAME_NW)
         gameEntity = FakeDataProvider.getListGameEntity(1)[0]
 
@@ -133,7 +128,7 @@ class RunRepositoryTest : BaseTest() {
     }
 
     @Test
-    fun testGetRunErrorNW(){
+    fun testGetRunErrorNW() {
         runEntityFromDB = FakeDataProvider.getRunWithId(RUN_ID, RUN_GAME_ID, PLAYER_NAME_DB)
         gameEntity = FakeDataProvider.getListGameEntity(1)[0]
 
@@ -151,8 +146,9 @@ class RunRepositoryTest : BaseTest() {
         Assert.assertTrue(runAndGameNW.first.playerName.equals(PLAYER_NAME_DB, true))
         Assert.assertTrue(runAndGameNW.second.id.equals(RUN_GAME_ID, true))
     }
+
     companion object {
-        const val RUN_ID= "ID"
+        const val RUN_ID = "ID"
         const val RUN_GAME_ID = "1"
         const val PLAYER_NAME_DB = "PLAYER_NAME_DB"
         const val PLAYER_NAME_NW = "PLAYER_NAME_NW"

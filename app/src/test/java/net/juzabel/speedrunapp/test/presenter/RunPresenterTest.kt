@@ -1,10 +1,10 @@
 package net.juzabel.speedrunapp.test.presenter
 
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import dagger.Lazy
+import io.reactivex.Observable
 import net.juzabel.speedrunapp.domain.interactor.RunInteractor
 import net.juzabel.speedrunapp.domain.model.Game
 import net.juzabel.speedrunapp.domain.model.Run
@@ -19,7 +19,6 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import java.lang.Exception
 
 class RunPresenterTest : BaseTest() {
     @Mock
@@ -53,17 +52,17 @@ class RunPresenterTest : BaseTest() {
 
     @Test
     fun testGetRun() {
-        whenever(runInteractor.execute(any(), eq(GAME_ID))).then { runPresenter.onNext(Pair(run, game)) }
+        whenever(runInteractor.execute( eq(GAME_ID))).thenReturn(Observable.just(Pair(run, game)))
         runPresenter.loadRun(GAME_ID)
-        verify(runInteractor, Mockito.times(1)).execute(any(), eq(GAME_ID))
+        verify(runInteractor, Mockito.times(1)).execute( eq(GAME_ID))
         verify(view, Mockito.times(1)).onRunRetrieved(run, game)
     }
 
     @Test
     fun testGetRunError() {
-        whenever(runInteractor.execute(any(), eq(GAME_ID))).then { runPresenter.onError(Exception(ERROR_MESSAGE)) }
+        whenever(runInteractor.execute( eq(GAME_ID))).thenReturn (Observable.error(Throwable(ERROR_MESSAGE)) )
         runPresenter.loadRun(GAME_ID)
-        verify(runInteractor, Mockito.times(1)).execute(any(), eq(GAME_ID))
+        verify(runInteractor, Mockito.times(1)).execute( eq(GAME_ID))
         verify(navigator, Mockito.times(1)).showMessage(ERROR_MESSAGE)
     }
 

@@ -1,11 +1,13 @@
 package net.juzabel.speedrunapp.interactor
 
-import dagger.Lazy
+import com.nhaarman.mockitokotlin2.whenever
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.TestObserver
 import io.reactivex.schedulers.Schedulers
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
+import net.juzabel.speedrunapp.FakeDataProvider
 import net.juzabel.speedrunapp.base.BaseInstrumentedTest
 import net.juzabel.speedrunapp.data.mapper.GameMapper
 import net.juzabel.speedrunapp.data.network.RestService
@@ -16,7 +18,7 @@ import net.juzabel.speedrunapp.domain.model.Game
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Before
 import org.junit.Test
-import retrofit2.HttpException
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class GameInteractorInstrumentedTest : BaseInstrumentedTest() {
@@ -29,21 +31,24 @@ class GameInteractorInstrumentedTest : BaseInstrumentedTest() {
 
     private lateinit var gameInteractor: GameInteractor
 
+    private lateinit var gameList: List<Game>
+
     @Before
     override fun setup() {
         super.setup()
 
         gameMapper = GameMapper()
 
-        gameDataFactory = GameDataFactory(Lazy { dbAdapter }, Lazy { RestService(apiService) })
+        gameDataFactory = GameDataFactory(dbAdapter, RestService(apiService))
 
-        gameRepositoryImpl = GameRepositoryImpl(Lazy { gameMapper }, Lazy { gameDataFactory })
+        gameRepositoryImpl = GameRepositoryImpl(gameMapper, gameDataFactory)
 
-        gameInteractor = GameInteractor(Lazy { gameRepositoryImpl })
+        gameInteractor = GameInteractor(gameRepositoryImpl)
     }
 
     @Test
-    fun testRetrieveGame() {
+    fun testRetrieveGameOK() {
+        whenever(dbAdapter.allGames()).thenReturn(Single.just(Collections.emptyList()))
 
         // Test network OK
         var mockResponse = MockResponse().setResponseCode(200)
@@ -57,19 +62,27 @@ class GameInteractorInstrumentedTest : BaseInstrumentedTest() {
                 .observeOn(AndroidSchedulers.mainThread(), true)
                 .subscribeWith(testObserver)
 
-        testObserver.awaitTerminalEvent(2, TimeUnit.SECONDS)
+        testObserver.awaitTerminalEvent(5, TimeUnit.SECONDS)
 
         testObserver.assertNoErrors()
         testObserver.assertComplete()
-        assertTrue((testObserver.events[0][0] as List<Game>).size == 1)
+        assertTrue((testObserver.events[0][1] as List<Game>).size == 1)
         assertEquals(mockServer.takeRequest().path, "/api/v1/games")
 
+        gameList = (testObserver.events[0][1] as List<Game>)
+    }
+
+    @Test
+    fun testRetrieveGameKO() {
         //Test NETWORK KO But got from DB
-        mockResponse = MockResponse().setResponseCode(404)
+
+        whenever(dbAdapter.allGames()).thenReturn(Single.just(FakeDataProvider.getListGameEntity(3)))
+
+        var mockResponse = MockResponse().setResponseCode(404)
 
         mockServer.enqueue(mockResponse)
 
-        testObserver = TestObserver<List<Game>>()
+        var testObserver = TestObserver<List<Game>>()
 
         gameInteractor.buildCaseObservable(null)
                 .subscribeOn(Schedulers.newThread())
@@ -78,8 +91,9 @@ class GameInteractorInstrumentedTest : BaseInstrumentedTest() {
 
         testObserver.awaitTerminalEvent(2, TimeUnit.SECONDS)
 
-        testObserver.assertError(HttpException::class.java)
+        testObserver.assertError(Exception::class.java)
         testObserver.assertNotComplete()
-        assertTrue((testObserver.events[0][0] as List<Game>).size == 1)
+        assertTrue((testObserver.events[0][0] as List<Game>).size == 3)
     }
+
 }

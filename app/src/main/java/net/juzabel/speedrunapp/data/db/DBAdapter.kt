@@ -2,7 +2,6 @@ package net.juzabel.speedrunapp.data.db
 
 import android.arch.persistence.room.Room
 import android.content.Context
-import dagger.Lazy
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
@@ -15,8 +14,8 @@ class DBAdapter {
     private val database: DataBase
 
     @Inject
-    constructor(context: Lazy<Context>) {
-        database = Room.databaseBuilder(context.get().applicationContext, DataBase::class.java, "database.db").build()
+    constructor(context: Context) {
+        database = Room.databaseBuilder(context.applicationContext, DataBase::class.java, "database.db").build()
     }
 
     fun allGames(): Single<List<GameEntity>>
